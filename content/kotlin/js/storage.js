@@ -45,6 +45,7 @@ function saveResult() {
     document.body.removeChild(downloadLink);
 }
 
+
 function convertSvgToPng(svgContent, desiredWidth, desiredHeight) {
     const img = new Image();
     img.width = desiredWidth;
@@ -61,14 +62,45 @@ function convertSvgToPng(svgContent, desiredWidth, desiredHeight) {
     return img
 }
 
+function convertSvgToJpg(svgContent, desiredWidth, desiredHeight) {
+    // Create an Image element, set its size and SVG content
+    const img = new Image();
+    img.width = desiredWidth;
+    img.height = desiredHeight;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
+
+    img.onload = () => {
+        // Create a canvas element, set its size, and draw the SVG image on it
+        const canvas = document.createElement('canvas');
+        canvas.width = desiredWidth;
+        canvas.height = desiredHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, desiredWidth, desiredHeight);
+    };
+    return img;
+}
+
 function saveResultPNG() {
     const svgData = document.getElementById("svg-result").getElementsByTagName("svg")[0].outerHTML
     const pngData = convertSvgToPng(svgData, 800, 800)
     const pngBlob = new Blob([pngData], { type: "image/png;base64" })
-    const svgUrl = URL.createObjectURL(pngBlob)
-    var downloadLink = document.createElement("a");
-    downloadLink.href = svgUrl;
+    const pngUrl = URL.createObjectURL(pngBlob)
+    const downloadLink = document.createElement("a")
+    downloadLink.href = pngUrl;
     downloadLink.download = "result"+(new Date().getUTCMilliseconds())+".png";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+function saveResultJPG() {
+    const svgData = document.getElementById("svg-result").getElementsByTagName("svg")[0].outerHTML
+    const jpgData = convertSvgToJpg(svgData, 800, 800)
+    const jpgBlob = new Blob([jpgData], { type: "image/jpg;base64" })
+    const jpgUrl = URL.createObjectURL(jpgBlob)
+    var downloadLink = document.createElement("a");
+    downloadLink.href = jpgUrl;
+    downloadLink.download = "result"+(new Date().getUTCMilliseconds())+".jpg";
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -79,6 +111,7 @@ document.getElementById('reset-all').onmouseup = () => stopReset();
 document.getElementById('reset-all').onmouseleave = () => stopReset();
 document.getElementById('save-button').onclick = () => saveResult();
 document.getElementById('save-png-button').onclick = () => saveResultPNG();
+document.getElementById('save-jpg-button').onclick = () => saveResultJPG();
 
 document.getElementById('theme-button').onclick = () => {
     if (document.documentElement.getAttribute('data-theme') == 'dark') {
