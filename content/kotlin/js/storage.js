@@ -45,9 +45,40 @@ function saveResult() {
     document.body.removeChild(downloadLink);
 }
 
+function convertSvgToPng(svgContent, desiredWidth, desiredHeight) {
+    const img = new Image();
+    img.width = desiredWidth;
+    img.height = desiredHeight;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
+
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = desiredWidth;
+        canvas.height = desiredHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, desiredWidth, desiredHeight);
+    };
+    return img
+}
+
+function saveResultPNG() {
+    const svgData = document.getElementById("svg-result").getElementsByTagName("svg")[0].outerHTML
+    const pngData = convertSvgToPng(svgData, 800, 800)
+    const pngBlob = new Blob([pngData], { type: "image/png;base64" })
+    const svgUrl = URL.createObjectURL(pngBlob)
+    var downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = "result"+(new Date().getUTCMilliseconds())+".png";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+
 document.getElementById('reset-all').onmouseup = () => stopReset();
 document.getElementById('reset-all').onmouseleave = () => stopReset();
 document.getElementById('save-button').onclick = () => saveResult();
+document.getElementById('save-png-button').onclick = () => saveResultPNG();
 
 document.getElementById('theme-button').onclick = () => {
     if (document.documentElement.getAttribute('data-theme') == 'dark') {
